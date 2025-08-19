@@ -1,0 +1,16 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, sans-serif;
+  background-color: #222;
+  color: white;
+  margin: 0;
+}
+
+canvas {
+  background-color: #111;
+  margin-top: 20px;
+  border: 2px solid #fff;
+  touch-action: none; /* importante para touch no mobile */
+}
