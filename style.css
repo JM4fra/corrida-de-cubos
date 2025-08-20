@@ -1,16 +1,13 @@
 html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
   overflow: hidden;      /* impede scroll */
   touch-action: none;    /* impede gestos nativos */
-  height: 100%;
-  width: 100%;
 }
 
 body {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   font-family: Arial, sans-serif;
   background-color: #222;
   color: white;
@@ -22,7 +19,5 @@ canvas {
   width: 100%;
   height: 100%;
   background-color: #111;
-  margin-top: 20px;
   border: 2px solid #fff;
-  touch-action: none; /* importante para touch no mobile */
 }
