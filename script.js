@@ -1,6 +1,30 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
+// Analógico virtual para celular
+let joystick = {
+  x: 80,  // posição inicial horizontal
+  y: 0,   // posição inicial vertical, vai ajustar no ajustarCanvas
+  radius: 50,
+  stickX: 80,
+  stickY: 0, // idem
+  active: false
+};
+
+// Ajustar canvas para ocupar toda a tela e posicionar joystick
+function ajustarCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  // Reposicionar joystick no canto inferior esquerdo
+  joystick.y = canvas.height - 80;
+  joystick.stickY = joystick.y;
+}
+
+// Inicializa tamanho do canvas e joystick
+ajustarCanvas();
+window.addEventListener('resize', ajustarCanvas);
+
 // Cubo do jogador
 const cubo = {
   x: canvas.width / 2 - 20,
@@ -83,16 +107,7 @@ document.addEventListener('keyup', e => {
   if (e.key === 's' || e.key === 'ArrowDown') teclas.baixo = false;
 });
 
-// Analógico virtual para celular
-let joystick = {
-  x: 60,
-  y: canvas.height - 60,
-  radius: 50,
-  stickX: 60,
-  stickY: canvas.height - 60,
-  active: false
-};
-
+// Eventos touch para joystick
 canvas.addEventListener('touchstart', e => {
   const touch = e.touches[0];
   const dx = touch.clientX - joystick.x;
