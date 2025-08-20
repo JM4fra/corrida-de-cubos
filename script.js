@@ -11,17 +11,23 @@ let joystick = {
   active: false
 };
 
+let toque = null; // posição atual do dedo
+
 // Ajustar canvas para ocupar toda a tela e posicionar joystick
 function ajustarCanvas() {
+  // Limitar altura ao tamanho da janela disponível
   canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  canvas.height = Math.min(window.innerHeight, 600); // 600 é altura máxima no PC
 
-  // Reposicionar joystick no canto inferior esquerdo
-  joystick.y = canvas.height - 80;
+  // Joystick proporcional à tela
+  joystick.radius = Math.min(canvas.width, canvas.height) * 0.08; // 8% do menor lado
+  joystick.x = joystick.radius + 20; // 20px da borda esquerda
+  joystick.y = canvas.height - joystick.radius - 20; // 20px da borda inferior
+  joystick.stickX = joystick.x;
   joystick.stickY = joystick.y;
 }
 
-// Inicializa tamanho do canvas e joystick
+// Inicializa canvas e joystick
 ajustarCanvas();
 window.addEventListener('resize', ajustarCanvas);
 
@@ -109,6 +115,7 @@ document.addEventListener('keyup', e => {
 
 // Eventos touch para joystick
 canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
   const touch = e.touches[0];
   const dx = touch.clientX - joystick.x;
   const dy = touch.clientY - joystick.y;
@@ -117,7 +124,14 @@ canvas.addEventListener('touchstart', e => {
   }
 });
 
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  const touch = e.touches[0];
+  toque = { x: touch.clientX, y: touch.clientY };
+});
+
 canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
   if (!joystick.active) return;
   const touch = e.touches[0];
   let dx = touch.clientX - joystick.x;
@@ -135,12 +149,16 @@ canvas.addEventListener('touchmove', e => {
   // Limites do canvas
   cubo.x = Math.max(0, Math.min(cubo.x, canvas.width - cubo.width));
   cubo.y = Math.max(0, Math.min(cubo.y, canvas.height - cubo.height));
+
+  toque = { x: touch.clientX, y: touch.clientY };
 });
 
 canvas.addEventListener('touchend', e => {
+  e.preventDefault();
   joystick.active = false;
   joystick.stickX = joystick.x;
   joystick.stickY = joystick.y;
+  toque = null;
 });
 
 // Loop do jogo
@@ -150,6 +168,18 @@ function gameLoop() {
   if (teclas.direita && cubo.x + cubo.width < canvas.width) cubo.x += cubo.speed;
   if (teclas.cima && cubo.y > 0) cubo.y -= cubo.speed;
   if (teclas.baixo && cubo.y + cubo.height < canvas.height) cubo.y += cubo.speed;
+
+  // Movimento por toque
+  if (toque) {
+    const dx = toque.x - (cubo.x + cubo.width / 2);
+    const dy = toque.y - (cubo.y + cubo.height / 2);
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const speed = Math.min(5, dist); // velocidade máxima
+    if (dist > 1) {
+      cubo.x += dx / dist * speed;
+      cubo.y += dy / dist * speed;
+    }
+  }
 
   if (Math.random() < 0.02) criarObstaculo();
   atualizarObstaculos();

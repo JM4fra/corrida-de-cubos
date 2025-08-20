@@ -1,3 +1,10 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  touch-action: none; /* importante para touch */
+}
+
 body {
   display: flex;
   flex-direction: column;
@@ -9,6 +16,7 @@ body {
 }
 
 canvas {
+  display: block;
   background-color: #111;
   margin-top: 20px;
   border: 2px solid #fff;
