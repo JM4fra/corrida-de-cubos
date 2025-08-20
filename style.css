@@ -1,8 +1,10 @@
 html, body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
-  touch-action: none; /* importante para touch */
+  overflow: hidden;      /* impede scroll */
+  touch-action: none;    /* impede gestos nativos */
+  height: 100%;
+  width: 100%;
 }
 
 body {
@@ -17,6 +19,8 @@ body {
 
 canvas {
   display: block;
+  width: 100%;
+  height: 100%;
   background-color: #111;
   margin-top: 20px;
   border: 2px solid #fff;
