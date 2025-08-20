@@ -11,31 +11,57 @@ window.addEventListener('resize', ajustarCanvas);
 
 // Analógico virtual para celular
 let joystick = {
-  x: 80,  // posição inicial horizontal
-  y: 0,   // posição inicial vertical, vai ajustar no ajustarCanvas
+  x: 0,
+  y: 0,
   radius: 50,
-  stickX: 80,
-  stickY: 0, // idem
+  stickX: 0,
+  stickY: 0,
   active: false
 };
+
+// Limite vertical para ativar joystick
+const limiteInferior = canvas.height * 0.5; // metade inferior da tela
+const distanciaBordaInferior = 100; // sobe um pouco do fim da tela
 
 let toque = null; // posição atual do dedo
 
 canvas.addEventListener('touchstart', e => {
-  e.preventDefault();
   const touch = e.touches[0];
-  toque = { x: touch.clientX, y: touch.clientY };
+
+  // só ativa se estiver na metade inferior
+  if (touch.clientY > limiteInferior) {
+    joystick.active = true;
+    joystick.x = touch.clientX;
+    joystick.y = canvas.height - distanciaBordaInferior; // sobe do fim
+    joystick.stickX = joystick.x;
+    joystick.stickY = joystick.y;
+  }
 });
 
 canvas.addEventListener('touchmove', e => {
-  e.preventDefault();
+  if (!joystick.active) return;
   const touch = e.touches[0];
-  toque = { x: touch.clientX, y: touch.clientY };
+  let dx = touch.clientX - joystick.x;
+  let dy = touch.clientY - joystick.y;
+  const dist = Math.min(Math.sqrt(dx*dx + dy*dy), joystick.radius);
+  const angle = Math.atan2(dy, dx);
+
+  joystick.stickX = joystick.x + Math.cos(angle) * dist;
+  joystick.stickY = joystick.y + Math.sin(angle) * dist;
+
+  // Movimento proporcional
+  cubo.x += Math.cos(angle) * dist * 0.1;
+  cubo.y += Math.sin(angle) * dist * 0.1;
+
+  // Limites do canvas
+  cubo.x = Math.max(0, Math.min(cubo.x, canvas.width - cubo.width));
+  cubo.y = Math.max(0, Math.min(cubo.y, canvas.height - cubo.height));
 });
 
 canvas.addEventListener('touchend', e => {
-  e.preventDefault();
-  toque = null;
+  joystick.active = false;
+  joystick.stickX = joystick.x;
+  joystick.stickY = joystick.y;
 });
 
 // Cubo do jogador
@@ -57,6 +83,21 @@ document.addEventListener('keyup', e => {
   if (e.key==='w'||e.key==='ArrowUp') teclas.cima=false;
   if (e.key==='s'||e.key==='ArrowDown') teclas.baixo=false;
 });
+
+function desenharJoystick() {
+  if (!joystick.active) return;
+
+  ctx.beginPath();
+  ctx.arc(joystick.x, joystick.y, joystick.radius, 0, Math.PI*2);
+  ctx.strokeStyle = 'white';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(joystick.stickX, joystick.stickY, 20, 0, Math.PI*2);
+  ctx.fillStyle = 'gray';
+  ctx.fill();
+}
 
 // Loop do jogo
 function gameLoop() {
@@ -83,6 +124,9 @@ function gameLoop() {
   // Desenhar cubo
   ctx.fillStyle = cubo.color;
   ctx.fillRect(cubo.x, cubo.y, cubo.width, cubo.height);
+
+  // Desenhar joystick
+  desenharJoystick();
 
   requestAnimationFrame(gameLoop);
 }
